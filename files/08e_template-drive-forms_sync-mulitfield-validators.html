@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Sync Muli-Field Validators</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="sync-muli-field-validators">Sync Muli-Field Validators</h1>
+<p>In this example we will learn how to use syns multi field validators for template driven forms in angular. We will learn how to create and use this sync validators ans well as display the validation errors.</p>
+<p>In general validators for template driven forms are implemented as directives. The parametrized version of such validators take there parameters over an input binding. Multifield validators are applied to a form instead of a form control and validate the form itself.</p>
+<h2 id="1-custom-multi-field-validation">1. Custom Multi-Field Validation</h2>
+<p>In this chapture we will learn how to validate the whole form.
+In our example we will create a &quot;roundTrip&quot; validator that checks if our values for from and to are different.</p>
+<p>Let's start by implementing a new directive called <code>validRoundTrip</code>.</p>
+<p>We create the directive with the angular cli. Open the console and run <code>ng generate directive pages/edit-flight/validators/validRoundTrip</code> or the short hand <code>ng g d pages/edit-flight/validators/validRoundTrip</code></p>
+<p>You should see a new file <code>valid-city.directive.ts</code> with the following content:</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-round-trip.directive.ts
+
+import { Directive } from '@angular/core';
+
+@Directive({
+  selector: '[appValidCity]'
+})
+export class ValidRoundTripDirective {
+
+  constructor() { }
+
+}
+</div></code></pre>
+<p>This directive should also be registered in your <code>app.module.ts</code> under declarations.</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/app.module.ts</span>
+
+...
+<span class="hljs-meta">@NgModule</span>({
+  declarations: [
+    ...
+    ValidRoundTripDirective,
+  ],
+  ...
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AppModule {
+
+}
+
+</div></code></pre>
+<p>Implement the interface and providers for the roundTrip validator.</p>
+<p>Lets start with the 'Validator' interface.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-round-trip.directive.ts
+
+...
+import {Validator} from '@angular/forms';
+
+@Directive({
+  selector: '[appValidRoundTrip]'
+})
+export class ValidRoundTripDirective implements Validator {
+
+}
+
+</div></code></pre>
+<p>Now we implement the requierd methods for the <code>Validator</code> interface.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-round-trip.directive.ts
+
+...
+import {Directive} from '@angular/core';
+import {FormGroup, ValidationErrors, Validator} from '@angular/forms';
+
+@Directive({
+  selector: '[appValidRoundTrip]'
+})
+export class ValidRoundTripDirective implements Validator {
+
+  validate(g: FormGroup): ValidationErrors | null {
+    return null;
+  }
+
+}
+
+</div></code></pre>
+<p>To activate the implemented methods we have to insert a propper provider.</p>
+<p>We create a const for the provider and insert it into the providers property of the directives decorator.
+As there could be multiple validators we have to use the <code>multi</code> flag with true.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-round-trip.directive.ts
+
+import {Directive, forwardRef} from '@angular/core';
+import {
+  FormGroup, NG_VALIDATORS, ValidationErrors,
+  Validator
+} from '@angular/forms';
+
+const MULTI_VALIDATOR_PROVIDER = {
+  provide: NG_VALIDATORS,
+  useExisting: forwardRef(() =&gt; ValidRoundTripDirective),
+  multi: true
+}
+
+@Directive({
+  selector: '[appValidRoundTrip]',
+  providers: [MULTI_VALIDATOR_PROVIDER]
+})
+export class ValidRoundTripDirective implements Validator {
+  ...
+}
+</div></code></pre>
+<p>To test this we insert a console.log statement that logs <code>multi field validator works</code> like following.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-round-trip.directive.ts
+
+...
+
+@Directive({
+  ...
+})
+export class ValidRoundTripDirective implements Validator {
+
+  validate(g: FormGroup): ValidationErrors | null {
+    console.log('multi field validator works');
+    return null;
+  }
+
+}
+
+</div></code></pre>
+<p>We also apply the diretive to our controls html element.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">...</span> <span class="hljs-attr">appValidRoundTrip</span>&gt;</span>
+</div></code></pre>
+<p>If you refresh your browser you should see the logs in the console.</p>
+<p>Next lets implement some validation logic.
+We want to check if the controls &quot;from&quot; and &quot;to&quot; have a different value. If one of them is null we skip the validation.
+Let's implement this logic into our validate function.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-round-trip.directive.ts
+
+  ...
+
+  validate(g: FormGroup): ValidationErrors | null {
+    const from = (g.controls.from) ? g.controls.from.value : null;
+    const to = (g.controls.to) ? g.controls.to.value : null;
+    if(from &amp;&amp; to &amp;&amp; from === to) {
+      return {
+        validRoundTrip : true
+      }
+    }
+    return null;
+ 
+  }
+...
+</div></code></pre>
+<p>In case of an error we return an object with the actual error name as key and as value we can provide true or an object with additional information. In our case <code>validRoundTrip</code> is the name of the error.</p>
+<p>Let's check if this works by implement another error message into our template at the top rifght belof the form open tag.</p>
+<pre><code class="language-html"><div>  ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"text-danger"</span> *<span class="hljs-attr">ngIf</span>=<span class="hljs-string">"form?.hasError('validRoundTrip')"</span>&gt;</span>
+    controls "from" and "to" have to be different
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  ...
+</div></code></pre>
+<p>If everything works we should see the error if the inputs &quot;from&quot; and &quot;to&quot; have the same values.</p>
+<h2 id="2-parametrized-custom-sync-multi-validators">2. Parametrized Custom Sync Multi Validators</h2>
+<p>As you can see our controls are hardcoded in the validaton method.
+We need a way to pass the contron names to validate be have a more generic validator.</p>
+<p>Therefore let's setup an inputbinding that takes care of this.
+In your <code>valid-round-trip.directive.ts</code> implemetn an inputbinding. To reduce the needed attributes we use the same name as our directives selector has,  'appValidRoundTrip'.</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/pages/flight-edit/validators/valid-round-trip.directive.ts</span>
+
+<span class="hljs-keyword">import</span> {... Input} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/core'</span>;
+...
+
+<span class="hljs-meta">@Directive</span>({
+  ...
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> ValidRoundTripDirective <span class="hljs-keyword">implements</span> Validator {
+
+  <span class="hljs-meta">@Input</span>() appValidRoundTrip: <span class="hljs-built_in">string</span>[] = [];
+
+  validate(g: FormGroup): ValidationErrors | <span class="hljs-literal">null</span> {
+    ...
+  }
+
+}
+
+
+In the <span class="hljs-string">'validate'</span> method <span class="hljs-keyword">let</span><span class="hljs-string">'s implement this logic by using the new property.
+
+```typescript
+// app/pages/flight-edit/validators/valid-round-trip.directive.ts
+
+export class ValidRoundTripDirective implements Validator {
+
+ ...
+
+  validate(g: FormGroup): ValidationErrors | null {
+    let noNullValues: boolean;
+    let someValuesEqual: boolean;
+
+    const countByValue = this.appValidRoundTrip
+      .reduce((acc, name) =&gt; {
+        // value given
+        if (g.controls[name] &amp;&amp; g.controls[name].value) {
+          const v = g.controls[name].value;
+          acc.valueCount[v] = acc.valueCount[v] ? acc.valueCount[v] + 1 : 1;
+        }
+        // null value or control not in group
+        else {
+          acc.emptyValues = acc.emptyValues + 1;
+        }
+        return acc;
+      }, {emptyValues: 0, valueCount: {}});
+
+    noNullValues = !countByValue.emptyValues;
+    someValuesEqual = !!Object.values(countByValue.valueCount).filter(v =&gt; v &gt; 1).length;
+
+    if (noNullValues &amp;&amp; someValuesEqual) {
+      return {
+        validRoundTrip: {
+          controls: this.appValidRoundTrip,
+          ... countByValue
+        }
+      };
+    }
+    return null;
+  }
+
+}
+
+</span></div></code></pre>
+<p>To test it we have to bind an array of ontorl names to our created inputbinding in the controls html element.
+We also update our error message and use the new error information.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> #<span class="hljs-attr">form</span>=<span class="hljs-string">"ngForm"</span> <span class="hljs-attr">...</span> [<span class="hljs-attr">appValidRoundTrip</span>]=<span class="hljs-string">"['from', 'to']"</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"text-danger"</span> *<span class="hljs-attr">ngIf</span>=<span class="hljs-string">"form?.hasError('validRoundTrip')"</span>&gt;</span>
+  The controls {{form?.getError('validRoundTrip').controls}} have to be different.
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+...
+</div></code></pre>
+<p>It works if we see again the error for an invalid round trip as well as the control names to check listed in the message.</p>
+
+    </body>
+    </html>

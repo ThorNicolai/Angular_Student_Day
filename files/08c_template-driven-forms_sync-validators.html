@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Sync Validators</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="sync-validators">Sync Validators</h1>
+<p>In this example we will learn how to use syns validators for template driven forms in angular. We will learn how to create and use this sync validators ans well as display the validation errors.</p>
+<p>In general validators for template driven forms are implemented as directives. The parametrized version of such validators take there parameters over an input binding.</p>
+<h2 id="1-custom-sync-validators">1. Custom Sync Validators</h2>
+<p>As we know already validators for template driven forms are inmplemented as directives. To create our own validator we need to create a
+new directive.</p>
+<p>Let's do this over the angular cli. Open the console and run <code>ng generate directive pages/edit-flight/validators/validCity</code> or the short hand <code>ng g d pages/edit-flight/validators/validCity</code></p>
+<p>You should see a new file <code>valid-city.directive.ts</code> with the following content:</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-city.directive.ts
+
+import { Directive } from '@angular/core';
+
+@Directive({
+  selector: '[appValidCity]'
+})
+export class ValidCityDirective {
+
+  constructor() { }
+
+}
+</div></code></pre>
+<p>This directive should also be registered in your <code>app.module.ts</code> under the declarations.</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/app.module.ts</span>
+
+...
+<span class="hljs-meta">@NgModule</span>({
+  declarations: [
+    ...
+    ValidCityDirective,
+  ],
+  ...
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AppModule {
+
+}
+
+</div></code></pre>
+<p>To access the controls validation logic we need to implement a provider and the interface <code>Validator</code>.
+Lets start with the interface.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-city.directive.ts
+
+...
+import {Validator} from '@angular/forms';
+
+@Directive({
+  selector: '[appValidCity]'
+})
+export class ValidCityDirective implements Validator {
+
+}
+
+</div></code></pre>
+<p>Now we implement the requierd methods for the <code>Validator</code> interface.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-city.directive.ts
+
+...
+import {
+  AbstractControl, ValidationErrors,
+  Validator
+} from '@angular/forms';
+
+@Directive({
+  selector: '[appValidCity]'
+})
+export class ValidCityDirective implements Validator {
+
+  validate(c: AbstractControl): ValidationErrors | null {
+    return null;
+  }
+
+}
+
+</div></code></pre>
+<p>To activate the implemented methods we have to insert a propper provider.</p>
+<p>Let's create a const for the provider and insert it into the providers property of the directives decorator.
+As there could be multiple validators we have to use the <code>multi</code> flag with true.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-city.directive.ts
+
+import {Directive, forwardRef} from '@angular/core';
+import {
+  AbstractControl, NG_VALIDATORS, ValidationErrors,
+  Validator
+} from '@angular/forms';
+
+...
+const VALIDATOR_PROVIDER = {
+  provide: NG_VALIDATORS,
+  useExisting: forwardRef(() =&gt; ValidCityDirective),
+  multi: true
+}
+
+@Directive({
+  selector: '[appValidCity]',
+  providers: [VALIDATOR_PROVIDER]
+})
+export class ValidCityDirective implements Validator {
+  ...
+}
+
+</div></code></pre>
+<p>To test this we insert a console.log statement that logs <code>validator works</code> like following.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-city.directive.ts
+
+...
+
+@Directive({
+  ...
+})
+export class ValidCityDirective implements Validator {
+
+  validate(c: AbstractControl): ValidationErrors | null {
+    console.log('validator works');
+    return null;
+  }
+
+}
+
+</div></code></pre>
+<p>We also apply the diretive to our controls html element.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">...</span> <span class="hljs-attr">appValidCity</span>&gt;</span>
+</div></code></pre>
+<p>If you refresh your browser you should see the logs in the console.</p>
+<p>Next lets implement some validation logic.
+We want to check if the input is eighter null of one of the valid cities which are provided over an array.
+To do this we go to our validate function and implement folowing logic.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-city.directive.ts
+
+  ...
+
+  validate(c: AbstractControl): ValidationErrors | null {
+      const validCities: string[] = ['Vienna', 'Cologne', 'Bern'];
+      if (c.value &amp;&amp; validCities.indexOf(c.value) === -1) {
+        return {
+          validCity: {
+            actualValue: c.value,
+            validCities: validCities
+          }
+        }
+      }
+      return null;
+  }
+...
+</div></code></pre>
+<p>In case of an error we return an object with the actual error name as key and as value we can provide true or an object with additional information. In our case <code>validCity</code> is the name of the error.</p>
+<p>Let's check if this works by implement another error message into our template.</p>
+<pre><code class="language-html"><div>  ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"text-danger"</span> *<span class="hljs-attr">ngIf</span>=<span class="hljs-string">"form?.controls?.id?.hasError('validCity')"</span>&gt;</span>
+    {{form?.controls?.id?.getError('validCity').actualValue}} is not a valid city. 
+    Use one of {{form?.controls?.id?.getError('validCity').validCities}}.
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  ...
+</div></code></pre>
+<p>If everything works we should see the error if the inputs value does not exist in our array of valid cities.</p>
+<h2 id="2-parametrized-custom-sync-validators">2 Parametrized Custom Sync Validators</h2>
+<p>If you noticed it we are pretty un flexible with this setup.
+We need a way to pass the valid cities into the validator to make it more generic.</p>
+<p>Therefore let's setup an inputbinding that takes care of taking the parameters from outside.
+In your <code>valid-city.directive.ts</code> implement an inputbinding. To reduce the needed attributes we use the same name as our directives selector has,  'appValidCity'.</p>
+<p>In the 'validate' method let's use this property and remove the static array. We also ust the new property in out returned error.</p>
+<pre><code class="language-typescript"><div><span class="hljs-keyword">import</span> {... Input} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/core'</span>;
+...
+
+<span class="hljs-meta">@Directive</span>({
+  ...
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> ValidCityDirective <span class="hljs-keyword">implements</span> Validator {
+  
+  <span class="hljs-meta">@Input</span>() appValidCity: <span class="hljs-built_in">string</span>[];
+
+  validate(c: AbstractControl): ValidationErrors | <span class="hljs-literal">null</span> {
+    <span class="hljs-keyword">if</span> (c.value &amp;&amp; <span class="hljs-keyword">this</span>.appValidCity.indexOf(c.value) === <span class="hljs-number">-1</span>) {
+      <span class="hljs-keyword">return</span> {
+        validCity: {
+          actualCity: c.value,
+          validCities: <span class="hljs-keyword">this</span>.appValidCity
+        }
+      }
+    }
+  }
+
+}
+
+</div></code></pre>
+<p>To test it we have to bind an array of cities to our created inputbinding in the controls html element.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">...</span> [<span class="hljs-attr">appValidCity</span>]=<span class="hljs-string">"['Vienna', 'Cologne']"</span>&gt;</span>
+...
+</div></code></pre>
+<p>It works if we see again the error for an invalid value.</p>
+
+    </body>
+    </html>

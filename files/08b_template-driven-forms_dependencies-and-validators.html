@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Template Driven Forms And Dependencies</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="template-driven-forms-and-dependencies">Template Driven Forms And Dependencies</h1>
+<p>In this sections, we will learn how to create template-driven validators with dependencies.
+We will start with some per setup code that we will walk through.
+After this, we will create an sync as well an async validator that uses another service for the validation.</p>
+<h2 id="1-predefined-code-walkthrough">1. Predefined Code Walkthrough</h2>
+<p>Here we take a look at the predefined code. If we nur this in our browser we should see a form with one single input. If we type into the input we should see logs in the console.</p>
+<h3 id="11-the-service-dependencies">1.1. The Service Dependencies</h3>
+<p>As our service, we will use the <code>AirportBlacklistService</code> to check if an airport is active or not.
+This service has 2 methods. One that returns a <code>string</code> and is named <code>isAirportBlacklisted</code>
+and one that returns <code>Observable</code> of <code>string</code> and is called <code>getAirportBlacklisted</code>.</p>
+  <details>
+   <summary>AirportBlacklistService</summary>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/flight-edit/services/airport-blacklist.service.ts</span>
+
+<span class="hljs-keyword">import</span> {Injectable} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/core'</span>;
+<span class="hljs-keyword">import</span> {Observable} <span class="hljs-keyword">from</span> <span class="hljs-string">'rxjs/Observable'</span>;
+
+<span class="hljs-meta">@Injectable</span>()
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AirportBlacklistService {
+
+  isAirportBlacklisted(ariportName: <span class="hljs-built_in">string</span>) {
+    <span class="hljs-keyword">if</span> (ariportName !== <span class="hljs-string">'Vienna'</span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-string">'blacklisted'</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'whitelisted'</span>;
+  }
+
+  getAirportBlacklisted(airportName: <span class="hljs-built_in">string</span>) {
+    <span class="hljs-keyword">let</span> serverResult = <span class="hljs-string">'whitelisted'</span>;
+    <span class="hljs-keyword">if</span> (airportName !== <span class="hljs-string">'Vienna'</span>) {
+      serverResult = <span class="hljs-string">'blacklisted'</span>;
+    }
+    <span class="hljs-keyword">return</span> Observable.of(serverResult).delay(<span class="hljs-number">1000</span>);
+  }
+
+}
+
+</div></code></pre>
+</details>
+<h3 id="12-the-validator-directive">1.2. The Validator Directive</h3>
+<p>We start with an empty validator directive called <code>AirportBlacklistedDirective</code>.</p>
+<details>
+   <summary>AirportBlacklistedDirective</summary>
+<pre><code class="language-typescript"><div><span class="hljs-keyword">import</span> {Directive, forwardRef} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/core'</span>;
+<span class="hljs-keyword">import</span> {
+  AbstractControl,
+  NG_VALIDATORS,
+  ValidationErrors,
+  Validator
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/forms'</span>;
+
+<span class="hljs-keyword">const</span> VALIDATOR_PROVIDER = {
+  provide: NG_VALIDATORS,
+  useExisting: forwardRef(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> AirportBlacklistedDirective),
+  multi: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-meta">@Directive</span>({
+  selector: <span class="hljs-string">'[appAirportBlacklisted]'</span>,
+  providers: [VALIDATOR_PROVIDER]
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AirportBlacklistedDirective <span class="hljs-keyword">implements</span> Validator {
+
+  <span class="hljs-keyword">constructor</span>(<span class="hljs-params"></span>) {
+  }
+
+  validate(c: AbstractControl): ValidationErrors | <span class="hljs-literal">null</span> {
+    <span class="hljs-keyword">let</span> error: ValidationErrors | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'airportBlacklisted works'</span>);
+    <span class="hljs-keyword">return</span> error;
+  }
+
+}
+</div></code></pre>
+</details>
+<h3 id="13-the-components-class">1.3. The Components Class</h3>
+<p>The component that contains our form looks like this:</p>
+<details>
+   <summary>FlightEditComponent Class</summary>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/pages/flight-edit/flight-edit-component.ts</span>
+
+<span class="hljs-keyword">import</span> {Component, OnInit} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/core'</span>;
+
+<span class="hljs-meta">@Component</span>({
+  selector: <span class="hljs-string">'app-flight-edit'</span>,
+  templateUrl: <span class="hljs-string">'./flight-edit.component.html'</span>
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> FlightEditComponent <span class="hljs-keyword">implements</span> OnInit {
+  airport: <span class="hljs-built_in">string</span>;
+
+  <span class="hljs-keyword">constructor</span>(<span class="hljs-params"></span>) {
+  }
+
+  ngOnInit(): <span class="hljs-built_in">void</span> {
+  }
+
+}
+
+</div></code></pre>
+</details>
+<h3 id="14-the-components-view">1.4. The Components View</h3>
+<p>And our components view that contains the forms HTML looks like this:</p>
+<details>
+   <summary>FlightEditComponent View</summary>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/flight-edit/flight-edit-component.html --&gt;</span> 
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> #<span class="hljs-attr">editForm</span>=<span class="hljs-string">"ngForm"</span>&gt;</span>
+
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"airport"</span> [(<span class="hljs-attr">ngModel</span>)]=<span class="hljs-string">"airport"</span> <span class="hljs-attr">appAirportBlacklisted</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span>
+  input1.value: {{editForm?.controls?.airport?.value}}<span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+</div></code></pre>
+</details>
+<h2 id="2-setup-sync-validators-with-dependencies">2. Setup Sync Validators With Dependencies</h2>
+<p>Using dependencies in a validator directive is pretty easy.
+We just need to implement the service in the directives constructor and are ready to go.</p>
+<h3 id="21-implement-the-service-dependencie">2.1. Implement the service dependencie</h3>
+<p>We implement the service in the directives constructor as every other class dependency.</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/pages/flight-edit/validators/airport-blacklist.directive.ts</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AirportBlacklistedDirective <span class="hljs-keyword">implements</span> Validator {
+
+  <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> aBS: AirportBlacklistService</span>) {
+  }
+
+ ...
+}
+</div></code></pre>
+<p>Next, we can use the service's method in our validation method.</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/pages/flight-edit/validators/airport-blacklist.directive.ts</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AirportBlacklistedDirective <span class="hljs-keyword">implements</span> Validator {
+
+  <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> aBS: AirportBlacklistService</span>) {
+  
+  validate(c: AbstractControl): ValidationErrors | <span class="hljs-literal">null</span> {
+    <span class="hljs-keyword">let</span> error: ValidationErrors | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">if</span> (c.value &amp;&amp; <span class="hljs-keyword">this</span>.aBS.isAirportBlacklisted(c.value) === <span class="hljs-string">'blacklisted'</span>) {
+      error = {
+        airportBlacklisted: <span class="hljs-literal">true</span>
+      };
+    }
+    <span class="hljs-keyword">return</span> error;
+  }
+
+}
+
+</div></code></pre>
+<p>To test this we add an error message to our forms HTML</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/flight-edit/flight-edit-component.html --&gt;</span> 
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> #<span class="hljs-attr">editForm</span>=<span class="hljs-string">"ngForm"</span>&gt;</span>
+ ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"text-danger"</span> *<span class="hljs-attr">ngIf</span>=<span class="hljs-string">"editForm?.controls?.airport?.hasError('airportBlacklisted')"</span>&gt;</span>
+    Airport blacklisted
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+</div></code></pre>
+<p>If we type in anything else than &quot;Vienna&quot; and the error shows up we know everything works fine.</p>
+<h2 id="3-setup-async-validators-with-dependencies">3. Setup Async Validators With Dependencies</h2>
+<p>To use the service in an async validator directive we need to refactor our directive to use the token <code>NG_ASYNC_VALIDATORS</code> and  the interface <code>AsyncValidator</code>.</p>
+<pre><code class="language-typescript"><div><span class="hljs-keyword">import</span> {
+  ...
+  AsyncValidator,
+  NG_ASYNC_VALIDATORS,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/forms'</span>;
+<span class="hljs-keyword">import</span> {Observable} <span class="hljs-keyword">from</span> <span class="hljs-string">'rxjs/Observable'</span>;
+...
+<span class="hljs-keyword">const</span> VALIDATOR_PROVIDER = {
+  provide: NG_ASYNC_VALIDATORS,
+  ...
+};
+
+<span class="hljs-meta">@Directive</span>({
+  ...
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AirportBlacklistedDirective <span class="hljs-keyword">implements</span> AsyncValidator {
+  ...
+  validate(c: AbstractControl): Observable&lt;ValidationErrors&gt; | Observable&lt;<span class="hljs-literal">null</span>&gt; {
+   ...
+  }
+
+}
+</div></code></pre>
+<p>Now we can use the <code>AirportBlacklistService.getAirportBlacklisted()</code> method in our async validator as follows:</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/pages/flight-edit/validators/airport-blacklisted.directive.ts</span>
+...
+  validate(c: AbstractControl): Observable&lt;ValidationErrors&gt; | Observable&lt;<span class="hljs-literal">null</span>&gt; {
+   <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.aBS.getAirportBlacklisted(c.value)
+      .map(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+        <span class="hljs-keyword">let</span> error: ValidationErrors | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">if</span> (result === <span class="hljs-string">'blacklisted'</span>) {
+          error = {
+            airportBlacklisted: <span class="hljs-literal">true</span>
+          };
+        }
+        <span class="hljs-keyword">return</span> error;
+      });
+  }
+...
+</div></code></pre>
+<p>We also add some information for status and pending state of our control to the views HTML:</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/flight-edit/flight-edit.component.html--&gt;</span>
+...
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"text-muted"</span>&gt;</span>
+  input1.status is: {{editForm?.controls?.airport?.status | json}}<span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span>
+  input1.pending state is: {{editForm?.controls?.airport?.pending}}<span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div></code></pre>
+<p>If everything works we should see the error after 1 second in our view if we enter a wrong value. It should disappear if we enter a valid value.</p>
+
+    </body>
+    </html>

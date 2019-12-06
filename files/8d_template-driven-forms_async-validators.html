@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Async Validation</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="async-validation">Async Validation</h1>
+<p>In this example we will learn how to use asyns validators for template driven forms in angular. We will learn how to create and use this async validators ans well as display the validation errors.</p>
+<p>In general validators for template driven forms are implemented as directives. The parametrized version of such validators take there parameters over an input binding. Async validators return observables instead of simplem values.</p>
+<h2 id="1-custom-async-validation">1. Custom Async Validation</h2>
+<p>Async validators for template driven forms are inmplemented in the same way as sync validators over a directives. To create our own validator we need to create a new directive again.</p>
+<p>We use the angular cli again to create the directive. Open the console and run the following command <code>ng generate directive pages/edit-flight/validators/asyncValidCity</code> or the short hand <code>ng g d pages/edit-flight/validators/asyncValidCity</code></p>
+<p>You should see a new file <code>async-valid-city.directive.ts</code> with the following content:</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/async-valid-city.directive.ts
+
+import { Directive } from '@angular/core';
+
+@Directive({
+  selector: '[appAsyncValidCity]'
+})
+export class AsyncValidCityDirective {
+
+  constructor() { }
+
+}
+</div></code></pre>
+<p>This directive should again be registered in your <code>app.module.ts</code> under the declarations.</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/app.module.ts</span>
+
+...
+<span class="hljs-meta">@NgModule</span>({
+  declarations: [
+    ...
+    AsyncValidCityDirective,
+  ],
+  ...
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AppModule {
+
+}
+
+</div></code></pre>
+<p>To access the controls validation logic we need to implement a provider and the interface as we did with sync validators, but this time we use the interface and provider for async validation.</p>
+<p>Let's start with the async interface <code>AsyncValidator</code>.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/async-valid-city.directive.ts
+
+...
+import {AsyncValidator} from '@angular/forms';
+
+@Directive({
+  selector: '[appValidCity]'
+})
+export class ValidCityDirective implements AsyncValidator {
+
+}
+
+</div></code></pre>
+<p>Now we implement the requierd methods for the <code>AsyncValidator</code> interface.
+This time we return an Observable of null instead of null.
+For our Observable we alos use a delay operator to simulate a http request.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/async-valid-city.directive.ts
+
+...
+import {
+  AbstractControl, AsyncValidator,
+  ValidationErrors
+} from '@angular/forms';
+import {Observable} from 'rxjs/Observable';
+
+@Directive({
+  selector: '[appAsyncValidCity]'
+})
+export class AsyncValidCityDirective implements AsyncValidator {
+
+  constructor() { }
+
+  validate(c: AbstractControl): Promise&lt;ValidationErrors | null&gt; | Observable&lt;ValidationErrors | null&gt; {
+    return Observable.of(null).delay(2000);
+  }
+
+}
+
+</div></code></pre>
+<p>To activate the implemented methods we have to insert a propper provider for <code>NG_ASYNC_VALIDATORS</code></p>
+<p>When we set up the const for the provider we see that the only difference to the sync validtator is the <code>NG_ASYNC_VALIDATORS</code> token.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/async-valid-city.directive.ts
+
+...
+const ASYNC_VALIDATOR_PROVIDER = {
+  provide: NG_ASYNC_VALIDATORS,
+  useExisting: forwardRef(() =&gt; AsyncValidCityDirective),
+  multi: true
+}
+
+@Directive({
+  selector: '[appAsyncValidCity]',
+  providers: [ASYNC_VALIDATOR_PROVIDER]
+})
+export class AsyncValidCityDirective implements AsyncValidator {
+...
+}
+
+
+</div></code></pre>
+<p>To test this we insert a console.log statement that logs <code>async validator works</code> to the console.
+We put it into a dooperator to print it after the delay.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/async-valid-city.directive.ts
+
+...
+
+@Directive({
+  ...
+})
+export class AsyncValidCityDirective implements AsyncValidator {
+
+  validate(c: AbstractControl): Promise&lt;ValidationErrors | null&gt; | Observable&lt;ValidationErrors | null&gt; {
+    return Observable.of(null).delay(2000).do(console.log('async validator works'));
+  }
+
+}
+
+</div></code></pre>
+<p>We also apply the diretive to our controls html element. Lets apply it to another input to test it independently.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">...</span> <span class="hljs-attr">appAsyncValidCity</span>&gt;</span>
+</div></code></pre>
+<p>If you refresh your browser you should see the logs in the console.</p>
+<p>Next lets implement the validation logic from the sync validatior.<br>
+Ret return values this time are Observables instead of sync values.</p>
+<pre><code class="language-typescritp"><div>// app/pages/flight-edit/validators/valid-city.directive.ts
+
+  ...
+
+  validate(c: AbstractControl): ValidationErrors | null {
+    const validCities: string[] = ['Vienna', 'Cologne', 'Bern'];
+    if (c.value &amp;&amp; validCities.indexOf(c.value) === -1) {
+      const error = {
+        asyncValidCity: {
+          actualValue: c.value,
+          validCities: validCities
+        }
+      }
+      return Observable.of(error).delay(2000);
+    }
+    return Observable.of(null).delay(2000);
+  }
+ 
+...
+</div></code></pre>
+<p>The errorname is now <code>asyncValidCity</code>.</p>
+<p>To check if this is working we implement an error message and also the validation status and pending state in our template.</p>
+<pre><code class="language-html"><div>  ...
+ <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"text-muted"</span>&gt;</span>
+    Validation status is: {{form?.controls?.to?.status | json}}.<span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span>
+    Pending state is: {{form?.controls?.to?.pending | json}}.
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"text-danger"</span> *<span class="hljs-attr">ngIf</span>=<span class="hljs-string">"form?.controls?.to?.hasError('asyncValidCity')"</span>&gt;</span>
+    {{form?.controls?.to?.getError('asyncValidCity').actualValue}} is not a valid city.
+    Use one of {{form?.controls?.to?.getError('asyncValidCity').validCities}}.
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  ...
+</div></code></pre>
+<p>If everything works we should see the status and pending state of the control as well as the error message.</p>
+<h2 id="2-parametrized-custom-async-validation">2 Parametrized Custom Async Validation</h2>
+<p>Now we refactore this validator to a parametrized one.
+In your <code>async-valid-city.directive.ts</code> implemetn an inputbinding for the array of valid cities and name it,  'appAsyncValidCity'.</p>
+<p>In the 'validate' method remove the static array and use the new property in out returned error.</p>
+<pre><code class="language-typescript"><div><span class="hljs-keyword">import</span> {... Input} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/core'</span>;
+...
+
+<span class="hljs-meta">@Directive</span>({
+  ...
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AsyncValidCityDirective <span class="hljs-keyword">implements</span> Validator {
+  
+  <span class="hljs-meta">@Input</span>() appAsyncValidCity: <span class="hljs-built_in">string</span>[];
+
+  validate(c: AbstractControl): ValidationErrors | <span class="hljs-literal">null</span> {
+    <span class="hljs-keyword">if</span> (c.value &amp;&amp; <span class="hljs-keyword">this</span>.appAsyncValidCity.indexOf(c.value) === <span class="hljs-number">-1</span>) {
+      <span class="hljs-keyword">const</span> error = {
+        appAsyncValidCity: {
+          actualCity: c.value,
+          validCities: <span class="hljs-keyword">this</span>.appAsyncValidCity
+        }
+      }
+      ...
+    }
+    ...
+  }
+
+}
+
+</div></code></pre>
+<p>To test it we have to bind an array of cities to our created inputbinding in the controls html element.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">...</span> [<span class="hljs-attr">appAsyncValidCity</span>]=<span class="hljs-string">"['Vienna', 'Cologne']"</span>&gt;</span>
+...
+</div></code></pre>
+<p>It works if we still see the error in case of an invalid value, but this time with our custom valid cities.</p>
+
+    </body>
+    </html>

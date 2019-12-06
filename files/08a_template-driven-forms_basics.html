@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Template Driven Forms</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+    </head>
+    <body class="vscode-light">
+        <h1 id="template-driven-forms">Template Driven Forms</h1>
+<p>In this example we will learn the basics of template driven forms in angular.
+We will learn how to set templatedriven forms up, use built-in validators and display validation errors.</p>
+<p>Before we start there are some things to know.
+First, template driven forms are here just because of an easy upgrade path from angularJS to angular.
+Second, as you might know most of the logic is placed in the template which make our html very hard to read and edit.
+If we move parte of the html we may break form related logic.</p>
+<h2 id="1-setup">1. Setup</h2>
+<p>To be able to use template-driven forms you have to import the related Module.
+Open your <code>app.module.ts</code> and add <code>FormsModule</code> to your imports:</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app/app.module.ts</span>
+
+...
+<span class="hljs-keyword">import</span> { FormsModule } <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/forms'</span>;
+...
+
+<span class="hljs-meta">@NgModule</span>({
+  ...
+  imports: [
+    ...
+    FormsModule
+  ],
+  ...
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AppModule {
+}
+
+</div></code></pre>
+<p>After this we can try to check if everything is working fine by using the <code>ngModel</code> directive on one of or inputs in edit-flight.html.
+We will use our property <code>id</code> to test this. We add the <code>ngModel</code> and bind the property from to it.
+We also print the value of <code>id</code> right below the input using the double-curly braces.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+
+...
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">...</span> [<span class="hljs-attr">ngModel</span>]=<span class="hljs-string">"id"</span> <span class="hljs-attr">...</span> &gt;</span>
+id: {{id}}
+...
+</div></code></pre>
+<p>If no error occours we did everything right and are ready to set up the form.</p>
+<p>To create a form and connect it to our controls we need the <code>ngForm</code> and the <code>ngModel</code> directive.
+We also need to differe between the individual form controls by name. Suprisingly we use the <code>name</code> attributte for it.
+Let's also use output binding to update our <code>id</code> property that is display right below the form control.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.ts --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span>  #<span class="hljs-attr">f</span>=<span class="hljs-string">"ngForm"</span>&gt;</span>
+  ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"id"</span> [<span class="hljs-attr">ngModel</span>]=<span class="hljs-string">"id"</span> (<span class="hljs-attr">ngModel</span>)=<span class="hljs-string">"id = $event"</span> &gt;</span>
+  id: {{id}}
+  ...
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+...
+</div></code></pre>
+<p>We could also use the shorthand for setting up property and event binding which should mimic angularJS 2-way-binding and is also known as &quot;banana in a box&quot; syntax.
+This syntax mimics the old and dirty angular 2-way-binding in a clean way.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.ts --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span>  #<span class="hljs-attr">f</span>=<span class="hljs-string">"ngForm"</span>&gt;</span>
+  ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"from"</span> [(<span class="hljs-attr">ngModel</span>)]=<span class="hljs-string">"from"</span>&gt;</span>
+  from: {{from}}
+  ...
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+...
+</div></code></pre>
+<p>If everything works fine you should be able to assign data to the control and update it by typing tinto the control.</p>
+<h2 id="2-basic-form-api">2. Basic Form API</h2>
+<p>Angular has some built in reflection of the forms and controls state into the related html elements.</p>
+<p>If you take a look at you forms html you will see the states for valid/invalid, pristine/dirty and touched/untouched reflected into the emelents hhtml as css classes.</p>
+<pre><code class="language-html"><div><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"ng-pristine ng-valid ng-touched"</span> <span class="hljs-attr">...</span>&gt;</span>
+</div></code></pre>
+<p>The same classes are also reflected for the forms control state.</p>
+<pre><code class="language-html"><div><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"ng-pristine ng-valid ng-touched"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"id"</span> <span class="hljs-attr">ng-reflect-name</span>=<span class="hljs-string">"id"</span> <span class="hljs-attr">...</span>&gt;</span>
+</div></code></pre>
+<p>You can also access the controls state by access it over the <code>form.controls</code> property.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"from"</span> [(<span class="hljs-attr">ngModel</span>)]=<span class="hljs-string">"from"</span>&gt;</span>
+ from.value: {{f?.controls?.from.value}}<span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span>
+ from.valid: {{f?.controls?.from.valid}}
+...
+</div></code></pre>
+<p>This should print the controls value and it's valid state to the screen.</p>
+<h2 id="3-built-in-sync-validation">3. Built-in Sync Validation</h2>
+<p>Angular ships with a set of default validators. They are related to the basic html5 built in form validations. 		 +INTRO HERE
+In templatedriven forms they are implemented as directives and you can use them the same way as you would do it with the html5 validators. To prevent interverence with the native validation angular adds the <code>novalidate</code> attribute automativally to the parent form.</p>
+<p>Let's implement some default validators to our from control:		 +## 1. Custom Sync Validators</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span>  <span class="hljs-attr">name</span>=<span class="hljs-string">"from"</span> [(<span class="hljs-attr">ngModel</span>)]=<span class="hljs-string">"from"</span>
+       <span class="hljs-attr">required</span>
+       <span class="hljs-attr">minlength</span>=<span class="hljs-string">"3"</span>
+       <span class="hljs-attr">maxlength</span>=<span class="hljs-string">"15"</span>
+       <span class="hljs-attr">pattern</span>=<span class="hljs-string">"[a-zA-Z ]*"</span>&gt;</span>
+...
+</div></code></pre>
+<p>To display check and display errors there are some methods that you can use.
+With the <code>.erroros</code> property you recieve an objecct containing all errors.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span>  <span class="hljs-attr">name</span>=<span class="hljs-string">"from"</span> [(<span class="hljs-attr">ngModel</span>)]=<span class="hljs-string">"from"</span>
+       <span class="hljs-attr">required</span>
+       <span class="hljs-attr">minlength</span>=<span class="hljs-string">"3"</span>
+       <span class="hljs-attr">maxlength</span>=<span class="hljs-string">"15"</span>
+       <span class="hljs-attr">pattern</span>=<span class="hljs-string">"[a-zA-Z ]*"</span>&gt;</span>
+
+errors: {{form?.controls?.from.errors}}
+...
+</div></code></pre>
+<p>You can check for a specific error of a control over the <code>.hasError</code> method, and get the value of a specific error over the <code>getError</code> method.</p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- app/pages/edit-flight/edit-flight.component.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span>  <span class="hljs-attr">name</span>=<span class="hljs-string">"from"</span> [(<span class="hljs-attr">ngModel</span>)]=<span class="hljs-string">"from"</span> <span class="hljs-attr">...</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"text-danger"</span> *<span class="hljs-attr">ngIf</span>=<span class="hljs-string">"form?.controls?.form?.hasError('minlength')"</span>&gt;</span>
+ A min length of {{form?.controls?.form?.getError('minlength').requiredLength}} is required
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+...
+</div></code></pre>
+
+    </body>
+    </html>
