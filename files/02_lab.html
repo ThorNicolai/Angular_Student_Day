@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Your first Component</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="your-first-component">Your first Component</h1>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>NodeJS in current LTS-Version (<a href="http://nodejs.org">http://nodejs.org</a>)</li>
+<li>Visual Studio Code (<a href="https://code.visualstudio.com/">https://code.visualstudio.com/</a>)</li>
+<li>Angular CLI (<code>npm i -g @angular/cli</code>)</li>
+</ul>
+<h3 id="recommented-plugins">Recommented Plugins</h3>
+<p>The following two plugins make working with Angular in Visual Studio Code easier.</p>
+<ul>
+<li>
+<p>Angular Language Service Plugin (<a href="https://marketplace.visualstudio.com/items?itemName=Angular.ng-template">https://marketplace.visualstudio.com/items?itemName=Angular.ng-template</a>)</p>
+</li>
+<li>
+<p>Angular Files Plugin (<a href="https://marketplace.visualstudio.com/items?itemName=alexiv.vscode-angular2-files">https://marketplace.visualstudio.com/items?itemName=alexiv.vscode-angular2-files</a>)</p>
+</li>
+</ul>
+<h2 id="getting-started">Getting started</h2>
+<p>In this section, we will take a closer took on the starter kit to get familiar with it.</p>
+<ol>
+<li>
+<p>Extract the starter kit (<code>starter.zip</code>).</p>
+</li>
+<li>
+<p>Open the starter kit in Visual Studio Code.</p>
+</li>
+<li>
+<p>Look at the Component in the file <code>app.component.ts</code> and app.component.html to understand it’s functionality.</p>
+</li>
+<li>
+<p>Look at the Module in the file <code>app.module.ts</code> to understand it’s functionality.</p>
+</li>
+<li>
+<p>Look at the file <code>index.html</code> to understand its functionality.</p>
+</li>
+<li>
+<p>In case it has not already been done, start the development server:</p>
+<p><code>npm start</code></p>
+</li>
+<li>
+<p>Open the project in your browser.</p>
+</li>
+<li>
+<p>Change the property <code>title</code> in the file <code>app.component.ts</code> to Hello World:</p>
+<pre><code><div>export class AppComponent {
+    title = &quot;Hello World!&quot;;
+}
+</div></code></pre>
+</li>
+<li>
+<p>Changing to the console, you can see that the application recompiles.</p>
+</li>
+<li>
+<p>Change to the browser to verify that the title is displayed as intended.</p>
+</li>
+</ol>
+<h2 id="component-to-search-for-flights">Component to search for flights</h2>
+<p>In this section we will implement the shown <code>FlightSearchComponent</code>.</p>
+<ol>
+<li>
+<p>Create a folder <code>entities</code> in your project's <code>app</code> folder.</p>
+</li>
+<li>
+<p>In this folder, create a file called <code>flight.ts</code>:</p>
+<pre><code class="language-typescript"><div><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> Flight {
+    id: <span class="hljs-built_in">number</span>;
+    <span class="hljs-keyword">from</span>: <span class="hljs-built_in">string</span>;
+    to: <span class="hljs-built_in">string</span>;
+    date: <span class="hljs-built_in">string</span>;
+    delayed?: <span class="hljs-built_in">boolean</span>;
+}
+</div></code></pre>
+</li>
+<li>
+<p>Create a folder <code>flight-search</code> in <code>src/app</code> for the <code>FlightSearchComponent</code> with the following files:</p>
+<ul>
+<li><code>flight-search.component.ts</code></li>
+<li><code>flight-search.component.html</code></li>
+</ul>
+<p><strong>Hint</strong>: If you've installed the plugins mentioned above, you can right click the folder and select <code>Generate Component</code>.</p>
+<p><strong>Hint</strong>: You can also generate those files using <code>ng generate component flight-search</code></p>
+</li>
+<li>
+<p>Open the file <code>flight-search.component.ts</code> and assign the selector <code>flight-search</code>:</p>
+<pre><code class="language-typescript"><div><span class="hljs-keyword">import</span> {Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/core'</span>;
+
+<span class="hljs-meta">@Component</span>({
+selector: <span class="hljs-string">'flight-search'</span>,
+templateUrl: <span class="hljs-string">'./flight-search.component.html'</span>
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> FlightSearchComponent {
+
+}
+</div></code></pre>
+</li>
+<li>
+<p>Open the file <code>flight-search.component.html</code> and insert some html to test it:</p>
+<pre><code class="language-html"><div><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Flight Search<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+</div></code></pre>
+</li>
+<li>
+<p>Make sure, the <code>FlightSearchComponent</code> is registered in the <code>app.module.ts</code> file.</p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app.module.ts</span>
+
+[...]
+<span class="hljs-meta">@NgModule</span>({
+declarations: [
+    [...]
+    FlightSearchComponent
+],
+[...]
+</div></code></pre>
+</li>
+<li>
+<p>In <code>app.component.html</code>, replace the data binding to <code>{{title}}</code> with <code>&lt;flight-search&gt;&lt;/flight-search&gt;</code></p>
+</li>
+<li>
+<p>Start your project (<code>npm start</code>). You should see the new component displayed.</p>
+</li>
+</ol>
+<h2 id="implement-component-logic-and-connect-it-with-the-template">Implement Component logic and connect it with the template</h2>
+<ol>
+<li>
+<p>Create following methods and properties for the <code>FlightSearchComponent</code>:</p>
+<pre><code class="language-typescript"><div>
+<span class="hljs-meta">@Component</span>({
+    selector: <span class="hljs-string">'flight-search'</span>,
+    templateUrl: <span class="hljs-string">'./flight-search.component.html'</span>
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> FlightSearchComponent <span class="hljs-keyword">implements</span> OnInit {
+
+    <span class="hljs-keyword">from</span>: <span class="hljs-built_in">string</span>;
+    to: <span class="hljs-built_in">string</span>;
+    flights: Flight[] = [];
+    selectedFlight: Flight;
+
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> http: HttpClient</span>) {
+    }
+
+    ngOnInit() { }
+
+    search(): <span class="hljs-built_in">void</span> {
+        <span class="hljs-comment">// Implementation follows</span>
+    }
+
+    select(f: Flight): <span class="hljs-built_in">void</span> {
+        <span class="hljs-keyword">this</span>.selectedFlight = f;
+    }
+}
+</div></code></pre>
+</li>
+<li>
+<p>Implement the method <code>search</code>. It should use the properties <code>from</code> and <code>to</code>. Inject the  <code>HttpClient</code> and use it to search for flights. Assign the found flights to the property <code>flights</code>.</p>
+ <details>
+ <summary>Show code</summary>
+ <p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// flight-search/flight-search.component.ts</span>
+
+<span class="hljs-keyword">import</span> {[...], HttpHeaders, HttpParams} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/common/http'</span>;
+
+[...]
+
+search(): <span class="hljs-built_in">void</span> {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-string">'http://www.angular.at/api/flight'</span>;
+    <span class="hljs-keyword">const</span> params = <span class="hljs-keyword">new</span> HttpParams()
+                        .set(<span class="hljs-string">'from'</span>, <span class="hljs-keyword">this</span>.from || <span class="hljs-string">''</span>)
+                        .set(<span class="hljs-string">'to'</span>, <span class="hljs-keyword">this</span>.to || <span class="hljs-string">''</span>);
+
+    <span class="hljs-keyword">this</span>.http
+        .get&lt;Flight[]&gt;(url, {params})
+        .subscribe(
+        <span class="hljs-function">(<span class="hljs-params">flights: Flight[]</span>) =&gt;</span> {
+            <span class="hljs-keyword">this</span>.flights = flights;
+        },
+        <span class="hljs-function">(<span class="hljs-params">errResp</span>) =&gt;</span> {
+            <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Error loading flights'</span>, errResp);
+        });
+}
+</div></code></pre>
+ </p>
+ </details>
+</li>
+<li>
+<p>Import the <code>HttpClientModule</code> into the <code>app.module.ts</code></p>
+<pre><code class="language-typescript"><div><span class="hljs-comment">// app.module.ts</span>
+
+<span class="hljs-keyword">import</span> {HttpClientModule} <span class="hljs-keyword">from</span> <span class="hljs-string">'@angular/common/http'</span>;
+[...]
+
+<span class="hljs-meta">@NgModule</span>({
+imports: [
+    [...]
+    HttpClientModule
+],
+[...]
+</div></code></pre>
+</li>
+<li>
+<p>Open <code>flight-search.component.html</code>, and add some html for the search form.
+Use the following html fragment for this.
+Note that you have to <strong>extend it with bindings</strong> later on:</p>
+<pre><code class="language-html"><div>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"card"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"header"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"title"</span>&gt;</span>Flight Search<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"content"</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">form</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>From:<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+                    <span class="hljs-attr">name</span>=<span class="hljs-string">"from"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-control"</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>To:<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+                    <span class="hljs-attr">name</span>=<span class="hljs-string">"to"</span>
+                    <span class="hljs-attr">class</span>=<span class="hljs-string">"form-control"</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+                   <span class="hljs-attr">class</span>=<span class="hljs-string">"btn btn-default"</span>&gt;</span>Search<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div></code></pre>
+</li>
+<li>
+<p>Add the missing data bindings to your template.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-html"><div><span class="hljs-comment">&lt;!-- flight-search/flight-search.component.html --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"card"</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"header"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"title"</span>&gt;</span>Flight Search<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"content"</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">form</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>From:<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> [(<span class="hljs-attr">ngModel</span>)]=<span class="hljs-string">"from"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"from"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-control"</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>To:<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> [(<span class="hljs-attr">ngModel</span>)]=<span class="hljs-string">"to"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"to"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-control"</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+                    [<span class="hljs-attr">disabled</span>]=<span class="hljs-string">"!to || !from"</span>
+                    (<span class="hljs-attr">click</span>)=<span class="hljs-string">"search()"</span>
+                    <span class="hljs-attr">class</span>=<span class="hljs-string">"btn btn-default"</span>&gt;</span>Search<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div></code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Add another section to the templates which will display the searched flights in a table.
+Use following html for this.
+Note that you have to <strong>extend it with bindings</strong> later on:</p>
+<pre><code class="language-html"><div>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"card"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">table</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"table table-contensed"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">thead</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>Id<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>From<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>To<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>Date<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">thead</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"btn btn-link"</span>&gt;</span>Select<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div></code></pre>
+</li>
+<li>
+<p>Add the data bindings to the inserted table.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-html"><div>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"card"</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">table</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"table table-contensed"</span> *<span class="hljs-attr">ngIf</span>=<span class="hljs-string">"flights.length &gt; 0"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">thead</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>Id<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>From<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>To<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>Date<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">thead</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tr</span> *<span class="hljs-attr">ngFor</span>=<span class="hljs-string">"let f of flights"</span>
+                [<span class="hljs-attr">class.active</span>]=<span class="hljs-string">"f === selectedFlight"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{{f.id}}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{{f.from }}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{{f.to }}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{{f.date | date:'dd.MM.yyyy HH:mm'}}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"btn btn-link"</span> (<span class="hljs-attr">click</span>)=<span class="hljs-string">"select(f)"</span>&gt;</span>Select<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div></code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Add a third section to the template. This should display the selected flight.
+Display this section only if a flight is selected.</p>
+<pre><code class="language-html"><div><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"card"</span> *<span class="hljs-attr">ngIf</span>=<span class="hljs-string">"selectedFlight"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"content"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">pre</span>&gt;</span>{{ selectedFlight | json }}<span class="hljs-tag">&lt;/<span class="hljs-name">pre</span>&gt;</span> <span class="hljs-comment">&lt;!-- neue Zeile --&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div></code></pre>
+</li>
+<li>
+<p>Start your solution with <code>npm start</code> and test it.</p>
+</li>
+</ol>
+
+    </body>
+    </html>
