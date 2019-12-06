@@ -58,3 +58,31 @@
       <pre>{{ selectedFlight | json }}</pre> <!-- neue Zeile -->
   </div>
 </div>
+
+<!-- flight-search/flight-search.component.html -->
+
+<div class="card">
+
+  <table class="table table-contensed" *ngIf="flights.length > 0">
+      <thead>
+      <tr>
+      <th>Id</th>
+      <th>From</th>
+      <th>To</th>
+      <th>Date</th>
+      <th></th>
+      </tr>
+      </thead>
+      <tr *ngFor="let f of flights"
+          [class.active]="f === selectedFlight">
+      <td>{{f.id}}</td>
+      <td>{{f.from | city:'short' }}</td>
+      <td>{{f.to | city:'long' }}</td>
+      <td>{{f.date | date:'dd.MM.yyyy HH:mm'}}</td>
+      <td>
+          <a (click)="select(f)">Select</a>
+      </td>
+      </tr>
+  </table>
+
+</div>

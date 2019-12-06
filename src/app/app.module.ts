@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { FlightSearchComponent } from './flight-search/flight-search.component';
 import { FlightService } from './flight-search/flight.service';
+import { CityPipe } from './shared/pipes/city.pipe';
 
 @NgModule({
    imports: [
@@ -19,7 +20,8 @@ import { FlightService } from './flight-search/flight.service';
       AppComponent,
       SidebarComponent,
       NavbarComponent,
-      FlightSearchComponent
+      FlightSearchComponent,
+      CityPipe
    ],
    providers: [
       { provide: FlightService, useClass: FlightService }
