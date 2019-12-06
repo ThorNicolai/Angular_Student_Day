@@ -1,4 +1,4 @@
-import { Flight } from '../entities/flight';
+import { Flight } from '../../entities/flight';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, Inject } from '@angular/core';
 import { Observable } from 'rxjs';
