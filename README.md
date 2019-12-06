@@ -1,4 +1,4 @@
-This project was part of the Angular-Student-Day.
+This project was part of the Angular-Student-Day.  
 Me and a few fellow students got an introduction to Angular by [Manfred Steyer](https://github.com/manfredsteyer), all files were provided by him.
 
 
